@@ -106,7 +106,7 @@ def mainKMeans(K,iter,dataPoints,N,prevCentroids,newCentroids,CentroidsSizeList)
             else:
                 print(str(mean[i]) + "\n")
 
-
+#compute the Euclidean Distance between 2 vectors
 def EuclideanDistance(v1,v2):
     assert len(v1)==len(v2)
     sum=0
@@ -116,7 +116,7 @@ def EuclideanDistance(v1,v2):
     return res
 
 
-
+#function that find the closeset cluster of datapoint
 def findClosestCluster(dataPoint,CentroidsList):
     meanIndex = 0
     minSum = math.inf
@@ -124,7 +124,6 @@ def findClosestCluster(dataPoint,CentroidsList):
     for mean in CentroidsList:
         index += 1
         sum =EuclideanDistance(dataPoint,mean)
-        # finding the cluster the is closest to dataPoint
         if sum <= minSum:
             minSum = sum
             meanIndex = index
@@ -140,6 +139,7 @@ def divVectors(mean, clusterSize, dimension):
     if clusterSize != 0:
         for i in range(dimension):
             mean[i] = mean[i] / clusterSize
+
 
 
 def checkEuclideanDistanceEpsilon(newCentroids, prevCentroids,K):
