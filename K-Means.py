@@ -1,8 +1,10 @@
 import sys
 import math
 Epsilon=0.001
+
+
 def main(argv):
-    if (len(argv) != 3 or len(argv) != 4):
+    if (len(argv) != 3 or len(argv) != 4): #the user gives less/more inputs from what we need
         print("Inavlid Input!")
         sys.exit()
 
@@ -11,7 +13,7 @@ def main(argv):
         if (argv[1].isnumeric() == False or argv[2].isnumeric() == False):
             print("Inavlid Input!")
             sys.exit()
-        if ((int)(argv[2]) <= 0):
+        if (((int)(argv[2]) <= 0) or  ((int)(argv[2]) >= 1000)):#check the number of iterations were given
             print("Inavlid Input!")
             sys.exit()
         else:
@@ -70,6 +72,8 @@ def InitalizeKMeans(K,iter,inputFileData):
 
     return mainKMeans(K,iter,dataPoints,N,prevCentroids,newCentroids,CentroidsSizeList)
 
+
+
 def mainKMeans(K,iter,dataPoints,N,prevCentroids,newCentroids,CentroidsSizeList):
     # for each 0<=i<N data_points_cluster[i]=S for s is the cluster of xi
     datapointsCluster = [0 for i in range(N)]
@@ -77,8 +81,6 @@ def mainKMeans(K,iter,dataPoints,N,prevCentroids,newCentroids,CentroidsSizeList)
     for iteration in range(iter):
         for i in range(N) :
             datapointsCluster[i]=findClosestCluster(dataPoints[i],newCentroids) #Assign every xi to the closest cluster k: argmind(xi, µk), ∀k 1 ≤ k ≤ K
-            # updtae number of datapoints that belongs to each cluster
-            # update cluster's size
             CentroidsSizeList[datapointsCluster[i] - 1] += 1
 
         newCentroids = [[float(0) for i in range(len(dataPoints[0]))]for j in range(K)]
@@ -96,6 +98,10 @@ def mainKMeans(K,iter,dataPoints,N,prevCentroids,newCentroids,CentroidsSizeList)
 
         updateOldCentroid(newCentroids, prevCentroids,K)
 
+
+    #printing!!
+
+
     # writing K centroids with 4 digits after the point to the output file
     Centroids_array = [['%.4f' % (newCentroids[j][i]) for i in range(len(dataPoints[0]))] for j in range(K)]
 
@@ -105,6 +111,9 @@ def mainKMeans(K,iter,dataPoints,N,prevCentroids,newCentroids,CentroidsSizeList)
                 print(str(mean[i]) + ",")
             else:
                 print(str(mean[i]) + "\n")
+
+
+
 
 #compute the Euclidean Distance between 2 vectors
 def EuclideanDistance(v1,v2):
