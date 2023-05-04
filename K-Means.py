@@ -3,36 +3,6 @@ import math
 Epsilon=0.001
 
 
-def main(argv):
-    if (len(argv) != 3 or len(argv) != 4): #the user gives less/more inputs from what we need
-        print("Inavlid Input!")
-        sys.exit()
-
-    if (len(argv) == 4):  # argument "iter" has been given by user
-        # checking if the first 2 arguments (K, iter) are integers
-        if (argv[1].isnumeric() == False or argv[2].isnumeric() == False):
-            print("Inavlid Input!")
-            sys.exit()
-        if (((int)(argv[2]) <= 0) or  ((int)(argv[2]) >= 1000)):#check the number of iterations were given
-            print("Inavlid Input!")
-            sys.exit()
-        else:
-            K = (int)(argv[1])
-            iter = (int)(argv[2])
-            return InitalizeKMeans(K, iter,argv[3])
-
-    if (len(argv) == 3):  # argument "iter" has not been given by user
-        # checking if  K is integer
-        if (argv[1].isnumeric() == False):
-            print("Inavlid Input!")
-            sys.exit()
-        else:
-            K = (int)(argv[1])
-            iter = 200 #default
-            return InitalizeKMeans(K, iter, argv[2])
-
-if __name__ == '__main__':
-    main(sys.argv)
 
 def InitalizeKMeans(K,iter,inputFileData):
 
@@ -87,7 +57,7 @@ def mainKMeans(K,iter,dataPoints,N,prevCentroids,newCentroids,CentroidsSizeList)
 
         # calculate updated clusters
         for i in range(len(dataPoints)):
-            addVectors(newCentroids[datapointsCluster[i]-1], datapointsCluster[i], len(dataPoints[0]))
+            addVectors(newCentroids[datapointsCluster[i]-1], dataPoints[i], len(dataPoints[0]))
         for i in range(len(newCentroids)):
             divVectors(newCentroids[i], CentroidsSizeList[i], len(dataPoints[0]))
 
@@ -120,7 +90,7 @@ def EuclideanDistance(v1,v2):
     assert len(v1)==len(v2)
     sum=0
     for i in range(len(v1)):
-        sum+=math.pow((v1[i]-v2[i]),2)
+        sum+=(math.pow()(v1[i]-v2[i]),2)
     res=math.sqrt(sum)
     return res
 
@@ -162,3 +132,39 @@ def updateOldCentroid(newCentroids, oldCentroids,K):
     for i in range(K):
         for j in range(len(newCentroids[0])):
             oldCentroids[i][j] = newCentroids[i][j]
+
+
+def main(argv):
+    print(argv)
+    print(len(argv))
+    if (len(argv) < 3 or len(argv) > 4): #the user gives less/more inputs from what we need
+        print("check1")
+        print("Inavlid Input!")
+        sys.exit()
+
+    if (len(argv) == 4):  # argument "iter" has been given by user
+        # checking if the first 2 arguments (K, iter) are integers
+        print("check4")
+        if (argv[1].isnumeric() == False or argv[2].isnumeric() == False):
+            print("Inavlid Input!")
+            sys.exit()
+        if (((int)(argv[2]) <= 0) or  ((int)(argv[2]) >= 1000)):#check the number of iterations were given
+            print("Inavlid Input!")
+            sys.exit()
+        else:
+            K = (int)(argv[1])
+            iter = (int)(argv[2])
+            return InitalizeKMeans(K, iter,argv[3])
+
+    if (len(argv) == 3):  # argument "iter" has not been given by user
+        # checking if  K is integer
+        if (argv[1].isnumeric() == False):
+            print("Inavlid Input!")
+            sys.exit()
+        else:
+            K = (int)(argv[1])
+            iter = 200 #default
+            return InitalizeKMeans(K, iter, argv[2])
+
+if __name__ == '__main__':
+    main(sys.argv)
