@@ -63,7 +63,7 @@ def mainKMeans(K,iter,dataPoints,N,prevCentroids,newCentroids,CentroidsSizeList)
 
         CentroidsSizeList = [0 for i in range(K)]
 
-        if (checkEuclideanDistanceEpsilon==False): #until convergence: (∆µk < epsilon)
+        if (checkConvergenceEPS==False): #until convergence: (∆µk < epsilon)
             break;
 
         updateOldCentroid(newCentroids, prevCentroids,K)
@@ -75,14 +75,8 @@ def mainKMeans(K,iter,dataPoints,N,prevCentroids,newCentroids,CentroidsSizeList)
     # writing K centroids with 4 digits after the point to the output file
     Centroids_array = [['%.4f' % (newCentroids[j][i]) for i in range(len(dataPoints[0]))] for j in range(K)]
 
-    for mean in Centroids_array:
-        for i in range(len(dataPoints[0])):
-            if i != (len(dataPoints[0]) - 1):
-                print(str(mean[i]) + ",")
-            else:
-                print(str(mean[i]) + "\n")
-
-
+    for centroid in newCentroids:
+        print(",".join("{:.4f}".format(x) for x in centroid) + "\n")
 
 
 #compute the Euclidean Distance between 2 vectors
@@ -90,7 +84,7 @@ def EuclideanDistance(v1,v2):
     assert len(v1)==len(v2)
     sum=0
     for i in range(len(v1)):
-        sum+=(math.pow()(v1[i]-v2[i]),2)
+        sum+=(math.pow((v1[i]-v2[i]),2))
     res=math.sqrt(sum)
     return res
 
@@ -121,7 +115,7 @@ def divVectors(mean, clusterSize, dimension):
 
 
 
-def checkEuclideanDistanceEpsilon(newCentroids, prevCentroids,K):
+def checkConvergenceEPS(newCentroids, prevCentroids,K):
     for i in range(K):
         if ((EuclideanDistance(newCentroids[i],prevCentroids[i])>=Epsilon)==False):
             return False
