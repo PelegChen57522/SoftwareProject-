@@ -47,8 +47,9 @@ def InitalizeKMeans(K,iter,inputFileData):
 def mainKMeans(K,iter,dataPoints,N,prevCentroids,newCentroids,CentroidsSizeList):
     # for each 0<=i<N data_points_cluster[i]=S for s is the cluster of xi
     datapointsCluster = [0 for i in range(N)]
+    iteration=0
 
-    for iteration in range(iter):
+    while iteration<iter:
         for i in range(N) :
             datapointsCluster[i]=findClosestCluster(dataPoints[i],newCentroids) #Assign every xi to the closest cluster k: argmind(xi, µk), ∀k 1 ≤ k ≤ K
             CentroidsSizeList[datapointsCluster[i] - 1] += 1
@@ -63,10 +64,12 @@ def mainKMeans(K,iter,dataPoints,N,prevCentroids,newCentroids,CentroidsSizeList)
 
         CentroidsSizeList = [0 for i in range(K)]
 
-        if (checkConvergenceEPS==False): #until convergence: (∆µk < epsilon)
-            break;
+        if checkConvergenceEps(newCentroids, prevCentroids,K): #until convergence: (∆µk < epsilon)
+            break
 
         updateOldCentroid(newCentroids, prevCentroids,K)
+
+        iteration+=1
 
 
     #printing!!
@@ -75,8 +78,14 @@ def mainKMeans(K,iter,dataPoints,N,prevCentroids,newCentroids,CentroidsSizeList)
     # writing K centroids with 4 digits after the point to the output file
     Centroids_array = [['%.4f' % (newCentroids[j][i]) for i in range(len(dataPoints[0]))] for j in range(K)]
 
-    for centroid in newCentroids:
-        print(",".join("{:.4f}".format(x) for x in centroid) + "\n")
+    for mean in Centroids_array:
+        print("[")
+        for i in range(len(dataPoints[0])):
+            if i != (len(dataPoints[0]) - 1):
+                print(str(mean[i]) + ",")
+            else:
+                print(str(mean[i]))
+                print("]")
 
 
 #compute the Euclidean Distance between 2 vectors
@@ -91,16 +100,7 @@ def EuclideanDistance(v1,v2):
 
 #function that find the closeset cluster of datapoint
 def findClosestCluster(dataPoint,CentroidsList):
-    meanIndex = 0
-    minSum = math.inf
-    index = 0
-    for mean in CentroidsList:
-        index += 1
-        sum =EuclideanDistance(dataPoint,mean)
-        if sum <= minSum:
-            minSum = sum
-            meanIndex = index
-    return meanIndex
+    return min(range(len(CentroidsList)), key=lambda i: EuclideanDistance(dataPoint, CentroidsList[i]))
 
 # updating the centroids by summing and dividing them by their size
 def addVectors(mean, data_point, dimension):
@@ -115,12 +115,11 @@ def divVectors(mean, clusterSize, dimension):
 
 
 
-def checkConvergenceEPS(newCentroids, prevCentroids,K):
+def checkConvergenceEps(newCentroids, prevCentroids,K):
     for i in range(K):
-        if ((EuclideanDistance(newCentroids[i],prevCentroids[i])>=Epsilon)==False):
+        if ((EuclideanDistance(newCentroids[i],prevCentroids[i])>=Epsilon)):
             return False
-        else:
-            return True
+    return True
 
 def updateOldCentroid(newCentroids, oldCentroids,K):
     for i in range(K):
