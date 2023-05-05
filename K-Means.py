@@ -1,37 +1,17 @@
 import sys
 import math
 Epsilon=0.001
+N=-1 #number of data points
 
+def InitalizeKMeans(K,numOfIter,inputFileData):
+    global N # number of datapoints that were given
+    with open(inputFileData, "r") as inputFile:
+        # take the date points into the lists
+        dataPoints = [[float(x) for x in line.split(",")] for line in inputFile.readlines()]
+        # Initialize centroids as first k datapoints: µk = xk, ∀k ∈ K
+        centroids = dataPoints[:K]
 
-
-def InitalizeKMeans(K,iter,inputFileData):
-
-    dataPoints = []  # the N datapoints x1, ... , xN
-    N = -1  # number of datapoints that were given
-    prevCentroids = []  # the unupdated centroids u1, ... , uK
-    newCentroids = []  # the updated centroids u1, ... , uK
-    CentroidsSizeList = [0 for i in range(K)]
-
-    # Read the data directly from the file
-    fileOpener = open(inputFileData,"r")  # "r" - Read - Default value. Opens a file for reading, error if the file does not exist
-
-    # take the date points into the lists
-    # Initialize centroids as first k datapoints: µk = xk, ∀k ∈ K
-
-    initializeKCentroids = 0
-    while True:
-        currentLine = fileOpener.readline()
-        if currentLine == '':  # there is no more data points
-            break
-        currDataPoint = [float(x) for x in currentLine.split(",")] #datapoint
-        dataPoints.append(currDataPoint)  # put the all datapoints in "dataPoints" list
-        if initializeKCentroids < K:  # Initialize centroids as first k datapoints: µk = xk, ∀k ∈ K
-            newCentroids.append(currDataPoint)
-            prevCentroids.append(currDataPoint)
-        initializeKCentroids += 1
-    fileOpener.close()
-
-    # update the number of datapoints that were given
+    # number of datapoints that were given
     N = len(dataPoints)
 
     # check if 1 < K < N
@@ -40,55 +20,58 @@ def InitalizeKMeans(K,iter,inputFileData):
         print("Invalid number of clusters!")
         sys.exit()
 
-    return mainKMeans(K,iter,dataPoints,N,prevCentroids,newCentroids,CentroidsSizeList)
+    return mainKMeans(K,numOfIter,dataPoints,centroids)
 
-
-
-def mainKMeans(K,iter,dataPoints,N,prevCentroids,newCentroids,CentroidsSizeList):
-    # for each 0<=i<N data_points_cluster[i]=S for s is the cluster of xi
-    datapointsCluster = [0 for i in range(N)]
-    iteration=0
-
-    while iteration<iter:
-        for i in range(N) :
-            datapointsCluster[i]=findClosestCluster(dataPoints[i],newCentroids) #Assign every xi to the closest cluster k: argmind(xi, µk), ∀k 1 ≤ k ≤ K
-            CentroidsSizeList[datapointsCluster[i] - 1] += 1
-
-        newCentroids = [[float(0) for i in range(len(dataPoints[0]))]for j in range(K)]
-
-        # calculate updated clusters
-        for i in range(len(dataPoints)):
-            addVectors(newCentroids[datapointsCluster[i]-1], dataPoints[i], len(dataPoints[0]))
-        for i in range(len(newCentroids)):
-            divVectors(newCentroids[i], CentroidsSizeList[i], len(dataPoints[0]))
-
-        CentroidsSizeList = [0 for i in range(K)]
-
-        if checkConvergenceEps(newCentroids, prevCentroids,K): #until convergence: (∆µk < epsilon)
+def mainKMeans(K, numOfIter,dataPoints,centroids):
+    for iter in range(numOfIter):
+        newCentroids=computeCentroids(dataPoints,centroids)
+        convergence= False
+        for j in range(K):
+            dist = EuclideanDistance(newCentroids[j],centroids[j])
+            if (dist >= Epsilon): #Check if not convergence
+                centroids = newCentroids #update centroids
+                convergence = True
+                break
+        if (convergence == False):
             break
-
-        updateOldCentroid(newCentroids, prevCentroids,K)
-
-        iteration+=1
-
-
-    #printing!!
+    #print
+    for centroid in newCentroids:
+        print(','.join(['%.4f' % c for c in centroid]))
 
 
-    # writing K centroids with 4 digits after the point to the output file
-    Centroids_array = [['%.4f' % (newCentroids[j][i]) for i in range(len(dataPoints[0]))] for j in range(K)]
+def computeCentroids(dataPoints, centroids):
+    dimension=len(centroids[0]) #dimension is initialized to the length of the first centroid, which is the same as the number of features in each data point.
+    sums = [[0 for j in range(dimension)] for i in range(len(centroids))] #sums is a 2D list initialized with all zeros. It will be used to store the sum of all data points assigned to each centroid.
+    counts = [0 for j in range(len(centroids))] #counts is a 1D list initialized with all zeros. It will be used to store the number of data points assigned to each centroid.
 
-    for mean in Centroids_array:
-        print("[")
-        for i in range(len(dataPoints[0])):
-            if i != (len(dataPoints[0]) - 1):
-                print(str(mean[i]) + ",")
-            else:
-                print(str(mean[i]))
-                print("]")
+    #Assign every xi to the closest cluster k: argminkd(xi, µk), ∀k 1 ≤ k ≤ K
+    for dataPoint in dataPoints:
+        min_index = 0
+        min_dist = float('inf')
+        for j in range(len(centroids)): #This is a loop that iterates over all centroids.
+            dist = 0
+            for l in range(dimension):
+                dist += (math.pow(dataPoint[l] - centroids[j][l], 2))
+
+            dist = math.sqrt(dist)
+            if (dist < min_dist):
+                min_dist = dist
+                min_index = j
+
+        counts[min_index] += 1
+        for m in range(len(dataPoint)):
+            sums[min_index][m] += dataPoint[m]
+
+    #Update the centroids: µk =1/|k|sums of xi∈k(xi)
+    for i in range(len(centroids)):
+        if counts[i] != 0:
+           for l in range(dimension):
+                sums[i][l] /= counts[i]
+
+    return sums
 
 
-#compute the Euclidean Distance between 2 vectors
+# compute the Euclidean Distance between 2 vectors
 def EuclideanDistance(v1,v2):
     assert len(v1)==len(v2)
     sum=0
@@ -98,46 +81,14 @@ def EuclideanDistance(v1,v2):
     return res
 
 
-#function that find the closeset cluster of datapoint
-def findClosestCluster(dataPoint,CentroidsList):
-    return min(range(len(CentroidsList)), key=lambda i: EuclideanDistance(dataPoint, CentroidsList[i]))
-
-# updating the centroids by summing and dividing them by their size
-def addVectors(mean, data_point, dimension):
-    for i in range(dimension):
-        mean[i] += data_point[i]
-
-
-def divVectors(mean, clusterSize, dimension):
-    if clusterSize != 0:
-        for i in range(dimension):
-            mean[i] = mean[i] / clusterSize
-
-
-
-def checkConvergenceEps(newCentroids, prevCentroids,K):
-    for i in range(K):
-        if ((EuclideanDistance(newCentroids[i],prevCentroids[i])>=Epsilon)):
-            return False
-    return True
-
-def updateOldCentroid(newCentroids, oldCentroids,K):
-    for i in range(K):
-        for j in range(len(newCentroids[0])):
-            oldCentroids[i][j] = newCentroids[i][j]
-
 
 def main(argv):
-    print(argv)
-    print(len(argv))
     if (len(argv) < 3 or len(argv) > 4): #the user gives less/more inputs from what we need
-        print("check1")
         print("Inavlid Input!")
         sys.exit()
 
     if (len(argv) == 4):  # argument "iter" has been given by user
         # checking if the first 2 arguments (K, iter) are integers
-        print("check4")
         if (argv[1].isnumeric() == False or argv[2].isnumeric() == False):
             print("Inavlid Input!")
             sys.exit()
@@ -146,8 +97,8 @@ def main(argv):
             sys.exit()
         else:
             K = (int)(argv[1])
-            iter = (int)(argv[2])
-            return InitalizeKMeans(K, iter,argv[3])
+            numOfIter = (int)(argv[2])
+            return InitalizeKMeans(K,  numOfIter,argv[3])
 
     if (len(argv) == 3):  # argument "iter" has not been given by user
         # checking if  K is integer
@@ -156,8 +107,8 @@ def main(argv):
             sys.exit()
         else:
             K = (int)(argv[1])
-            iter = 200 #default
-            return InitalizeKMeans(K, iter, argv[2])
+            numOfIter = 200 #default
+            return InitalizeKMeans(K,  numOfIter, argv[2])
 
 if __name__ == '__main__':
     main(sys.argv)
