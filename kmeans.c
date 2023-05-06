@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
     char *endptr2;
 
     if (argc < 2 || argc > 3) {
-        fprintf(stderr, "Usage: %s K iter <input_data.txt\n", argv[0]);
+        fprintf(stderr, "An Error Has Occurred\n");
         return 1;
     }
 
@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
         data[i] = (double *)malloc(d * sizeof(double));
         for (j = 0; j < d; j++) {
             if (scanf("%lf,", &data[i][j]) != 1) {
-                fprintf(stderr, "Error reading data\n");
+                fprintf(stderr, "An Error Has Occurred\n");
                 return 1;
             }
         }
