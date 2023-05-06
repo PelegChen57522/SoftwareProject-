@@ -90,10 +90,10 @@ def main(argv):
     if (len(argv) == 4):  # argument "iter" has been given by user
         # checking if the first 2 arguments (K, iter) are integers
         if (argv[1].isnumeric() == False or argv[2].isnumeric() == False):
-            print("Inavlid Input!")
+            print("Invalid number of clusters!")
             sys.exit()
-        if (((int)(argv[2]) <= 0) or  ((int)(argv[2]) >= 1000)):#check the number of iterations were given
-            print("Inavlid Input!")
+        if (((int)(argv[2]) <= 1) or  ((int)(argv[2]) >= 1000)):#check the number of iterations were given
+            print("Invalid maximum iteration!")
             sys.exit()
         else:
             K = (int)(argv[1])
@@ -103,12 +103,12 @@ def main(argv):
     if (len(argv) == 3):  # argument "iter" has not been given by user
         # checking if  K is integer
         if (argv[1].isnumeric() == False):
-            print("Inavlid Input!")
+            print("Invalid number of clusters!")
             sys.exit()
         else:
             K = (int)(argv[1])
             numOfIter = 200 #default
-            return InitalizeKMeans(K,  numOfIter, argv[2])
+            return InitalizeKMeans(K,numOfIter, argv[2])
 
 if __name__ == '__main__':
     main(sys.argv)
