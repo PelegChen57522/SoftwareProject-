@@ -89,10 +89,10 @@ def main(argv):
 
     if (len(argv) == 4):  # argument "iter" has been given by user
         # checking if the first 2 arguments (K, iter) are integers
-        if (argv[1].isnumeric() == False or argv[2].isnumeric() == False):
+        if (argv[1].isnumeric() == False):
             print("Invalid number of clusters!")
             sys.exit()
-        if (((int)(argv[2]) <= 1) or  ((int)(argv[2]) >= 1000)):#check the number of iterations were given
+        if (argv[2].isnumeric() == False or ((int)(argv[2]) <= 1) or  ((int)(argv[2]) >= 1000)):#check the number of iterations were given
             print("Invalid maximum iteration!")
             sys.exit()
         else:
