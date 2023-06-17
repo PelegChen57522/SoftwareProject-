@@ -1,7 +1,7 @@
 from setuptools import Extension, setup
 
-module = Extension("kmeanssp", sources=['kmeansmodule.c'])
-setup(name='kmeanssp',
+module = Extension("mykmeanssp", sources=['kmeansmodule.c'])
+setup(name='mykmeanssp',
      version='1.0',
-     description='K-means clustering extension module',
+     description='K-means algo - HW2',
      ext_modules=[module])
