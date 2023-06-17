@@ -73,7 +73,7 @@ void assign_clusters(double **centroids, double **data, int *cluster_assignment,
     }
 }
 
-void kmeans(double **centroids, double **data, int n, int k, int d, int max_iter, double epsilon)
+PyObject * kmeans(double **centroids, double **data, int n, int k, int d, int max_iter, double epsilon)
 {
     int *cluster_assignment = (int *)malloc(n * sizeof(int));
     int i, j, t;
@@ -119,110 +119,46 @@ void kmeans(double **centroids, double **data, int n, int k, int d, int max_iter
         }
     }
 
-    for (i = 0; i < k; i++)
-    {
-        for (j = 0; j < d; j++)
-        {
-            printf("%.4f", centroids[i][j]);
-            if (j < d - 1)
-            {
-                printf(",");
-            }
-        }
-        printf("\n");
-    }
 
     free(cluster_assignment);
+
+    PyObject *final_centroids = PyList_New(k);
+    for (i = 0; i < k; i++) {
+        PyObject *centroid = PyList_New(d);
+        for (j = 0; j < d; j++) {
+            PyObject *coordinate = PyFloat_FromDouble(centroids[i][j]);
+            PyList_SetItem(centroid, j, coordinate);
+        }
+        PyList_SetItem(final_centroids, i, centroid);
+    }
+
+    return final_centroids;
+
 }
+
+
+
 
 static PyObject *fit(PyObject *self, PyObject *args)
 {
 
-    int k int max_iter
-        // int n
-        // int d
-        int i,
-        j;
+    int k ;
+    int max_iter;
+    int i;
     double epsilon;
 
-    // get it from python
-    //  double **data, **centroids;
-    // char ch;
-    // char *endptr;
-    // char *endptr2;
 
     PyObject *datapoints_pyObj;
     PyObject *centroids_pyObj;
 
-    // PyArg_ParseTuple() parses the arguments you’ll receive from your Python program into local variables.
     if (!PyArg_ParseTuple(args, "OOiid", &datapoints_pyObj, &centroids_pyObj, &k, &max_iter, &epsilon))
     {
         return NULL;
     }
 
-    // if (argc < 2 || argc > 3) {
-    //     fprintf(stderr, "An Error Has Occurred\n");
-    //     return 1;
-    // }
 
-    // k = strtol(argv[1], &endptr, 10);
-    // if (*endptr != '\0' || k <= 1) {
-    //     fprintf(stderr, "Invalid number of clusters!\n");
-    //     return 1;
-    // }
-
-    // if (argc == 3) {
-    //     max_iter = strtol(argv[2], &endptr2, 10);
-    //     if (*endptr2 != '\0' || max_iter <= 1 || max_iter >= 1000) {
-    //         fprintf(stderr, "Invalid maximum iteration!\n");
-    //         return 1;
-    //     }
-    // } else {
-    //     max_iter = 200;
-    // }
-
-    epsilon = 0.001;
-
-    // /* Calculate dimensions and number of data points */
-    // n = 0;
-    // d = 0;
-    // while ((ch = getchar()) != EOF) {
-    //     if (ch == '\n') {
-    //         n++;
-    //     } else if (n == 0 && ch == ',') {
-    //         d++;
-    //     }
-    // }
-    // d++; /* Add 1 because the last dimension is not followed by a comma */
-
-    // rewind(stdin); /* Reset file pointer to the beginning of the input */
-
-    // data = (double **)malloc(n * sizeof(double *));
-    // for (i = 0; i < n; i++) {
-    //     data[i] = (double *)malloc(d * sizeof(double));
-    //     for (j = 0; j < d; j++) {
-    //         if (scanf("%lf,", &data[i][j]) != 1) {
-    //             fprintf(stderr, "An Error Has Occurred\n");
-    //             return 1;
-    //         }
-    //     }
-    // }
-
-    //: Initialize centroids as first k datapoints: ֲµk = xk, גˆ€k גˆˆ K
-
-    // centroids = (double **)malloc(k * sizeof(double *));
-    // for (i = 0; i < k; i++) {
-    //     centroids[i] = (double *)malloc(d * sizeof(double));
-    //     for (j = 0; j < d; j++) {
-    //         centroids[i][j] = data[i][j];
-    //     }
-    // }
-
-
-
-    /* Convert Python list of data points to C array */
     int n = PyList_Size(datapoints_pyObj);
-    int d = PyList_Size(PyList_GetItem(data_points_pyObj, 0));
+    int d = PyList_Size(PyList_GetItem(datapoints_pyObj, 0));
 
     double **datapoints = (double **)malloc(n * sizeof(double *));
     for (int i = 0; i < n; i++)
@@ -233,13 +169,13 @@ static PyObject *fit(PyObject *self, PyObject *args)
         for (int j = 0; j < d; j++)
         {
             PyObject *coordinate_pyObj = PyList_GetItem(datapoint_pyObj, j);
-            datapoints[i][j] = PyFloat_AsDouble(coordinate_obj);
+            datapoints[i][j] = PyFloat_AsDouble(coordinate_pyObj);
         }
     }
 
-    /* Convert Python list of centroids to C array */
-    double **centroids = (double **)malloc(K * sizeof(double *));
-    for (int i = 0; i < K; i++)
+
+    double **centroids = (double **)malloc(k * sizeof(double *));
+    for (int i = 0; i < k; i++)
     {
         centroids[i] = (double *)malloc(d * sizeof(double));
 
@@ -253,13 +189,16 @@ static PyObject *fit(PyObject *self, PyObject *args)
 
 
 
-    kmeans(centroids, data, n, k, d, max_iter, epsilon);
-
+    PyObject *final_centroids = kmeans(centroids, datapoints, n, k, d, max_iter, epsilon);
+    if (final_centroids == NULL) {
+        printf("An Error Has Occurred");
+        return NULL;
+    }
     for (i = 0; i < n; i++)
     {
-        free(data[i]);
+        free(datapoints[i]);
     }
-    free(data);
+    free(datapoints);
 
     for (i = 0; i < k; i++)
     {
@@ -267,7 +206,8 @@ static PyObject *fit(PyObject *self, PyObject *args)
     }
     free(centroids);
 
-    return 0;
+    return Py_BuildValue("O", final_centroids);
+
 }
 
 // PyMethodDef
@@ -284,20 +224,20 @@ static PyMethodDef kmeans_methods[] = {
 // This initiates the module using the above definitions.
 static struct PyModuleDef kmeans_module = {
     PyModuleDef_HEAD_INIT,
-    "kmeanssp",
+    "mykmeanssp",
     "K-means clustering module",
     -1,
     kmeans_methods};
 
 // PyMODINIT_FUNC
-// When a Python program imports your module for the first time, it will call PyInit_kmeanssp(void):
-PyMODINIT_FUNC PyInit_kmeanssp(void)
+// When a Python program imports your module for the first time, it will call PyInit_mykmeanssp(void):
+PyMODINIT_FUNC PyInit_mykmeanssp(void)
 {
     PyObject *m;
     m = PyModule_Create(&kmeans_module);
     if (!m)
     {
-        return null;
+        return NULL;
     }
     return m;
 }
