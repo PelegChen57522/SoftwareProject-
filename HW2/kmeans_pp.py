@@ -1,54 +1,47 @@
 import sys
 import numpy as np
 import pandas as pd
-#import mykmeanssp
+import mykmeanssp
 
 def kmeanspp_init(data, k):
+    data_np = data.to_numpy()  
     np.random.seed(0)
-    centroids_idx = [np.random.choice(len(data))]
-    centroids = [data[centroids_idx[0]]]
+    centroids_idx = [np.random.choice(len(data_np))]
+    centroids = [list(data_np[centroids_idx[0]])] 
 
     for _ in range(1, k):
-        dist_sq = np.array([min([np.linalg.norm(x - c) ** 2 for c in centroids]) for x in data])
+        dist_sq = np.array([min([0 if np.array_equal(x, c) else np.linalg.norm(x - c) for c in centroids]) for x in data_np])
         probs = dist_sq / dist_sq.sum()
-        cumulative_probs = probs.cumsum()
-        r = np.random.rand()
-
-        for j, p in enumerate(cumulative_probs):
-            if r < p:
-                i = j
-                break
-
+        i = np.random.choice(len(data_np), p=probs)
+        
         centroids_idx.append(i)
-        centroids.append(data[i])
+        centroids.append(list(data_np[i]))
 
     return centroids_idx, centroids
 
 
 def main(k, iter, eps, file1, file2):
     try:
-        df1 = pd.read_csv(file1, sep=" ", header=None, dtype={0: int, 1: float})
-        df2 = pd.read_csv(file2, sep=" ", header=None, dtype={0: int, 1: float})
+        df1 = pd.read_csv(file1,index_col = 0, header = None)
+        df2 = pd.read_csv(file2,index_col = 0, header = None)
+        data = pd.merge(df1, df2, left_on=df1.index, right_on=df2.index).sort_values(by="key_0", ascending=True).iloc[:,1:]
 
-        df = pd.merge(df1, df2, on=0, how='inner')
-        df.sort_values(by=[0], inplace=True)
-
-        data = df.values[:, 1:]
         N = len(data)
 
         if k >= N:
             print("Invalid number of clusters!")
             sys.exit()
 
+
         initial_centroids_idx, initial_centroids = kmeanspp_init(data, k)
+        
+        
+        data = [x.tolist() for index, x in data.iterrows()]
+        final_centroids = mykmeanssp.fit(data,initial_centroids, k, iter,eps)
+        print(",".join(str(x) for x in initial_centroids_idx))
+        for center in final_centroids:
+            print(",".join(str("{:.4f}".format(round(x, 4))) for x in center))
 
-
-
-        final_centroids = mykmeanssp.fit(initial_centroids, data, eps, iter)
-
-        print(','.join(map(str, df.iloc[initial_centroids_idx, 0].values)))
-        for centroid in final_centroids:
-            print(','.join(map(lambda x: f'{x:.4f}', centroid)))
     except:
         print("An Error Has Occurred")
 
