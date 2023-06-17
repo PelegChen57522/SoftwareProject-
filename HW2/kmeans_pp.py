@@ -27,12 +27,14 @@ def main(k, iter, eps, file1, file2):
         data = pd.merge(df1, df2, left_on=df1.index, right_on=df2.index).sort_values(by="key_0", ascending=True).iloc[:,1:]
 
         N = len(data)
+    except:
+        print("An Error Has Occurred")
 
-        if k >= N:
-            print("Invalid number of clusters!")
-            sys.exit()
+    if k >= N:
+        print("Invalid number of clusters!")
+        sys.exit()
 
-
+    try:
         initial_centroids_idx, initial_centroids = kmeanspp_init(data, k)
         
         
@@ -51,14 +53,20 @@ if __name__ == '__main__':
         print("An Error Has Occurred")
         sys.exit()
 
+    if not sys.argv[1].isdigit():
+        print("Invalid number of clusters!")
+        sys.exit()
     k = int(sys.argv[1])
-    if k < 1:
+    if not isinstance(k, int) or k <= 1:
         print("Invalid number of clusters!")
         sys.exit()
 
     if len(sys.argv) == 6:
+        if not sys.argv[2].isdigit():
+            print("Invalid maximum iteration!")
+            sys.exit()
         iter = int(sys.argv[2])
-        if iter < 1 or iter > 1000:
+        if not isinstance(iter, int) or iter <= 1 or iter >= 1000:
             print("Invalid maximum iteration!")
             sys.exit()
         eps = float(sys.argv[3])
