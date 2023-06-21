@@ -20,7 +20,7 @@ def kmeanspp_init(data, k):
     return centroids_idx, centroids
 
 
-def main(k, iter, eps, file1, file2):
+def main(k, iter, eps, file1, file2, cluster_flag,iter_flag ):
     try:
         df1 = pd.read_csv(file1,index_col = 0, header = None)
         df2 = pd.read_csv(file2,index_col = 0, header = None)
@@ -29,9 +29,12 @@ def main(k, iter, eps, file1, file2):
         N = len(data)
     except:
         print("An Error Has Occurred")
+        sys.exit()
 
-    if k >= N:
+    if cluster_flag or k >= N:
+        cluster_flag = True
         print("Invalid number of clusters!")
+    if cluster_flag or iter_flag:
         sys.exit()
 
     try:
@@ -49,26 +52,31 @@ def main(k, iter, eps, file1, file2):
 
 
 if __name__ == '__main__':
+    cluster_flag = False
+    iter_flag = False
+    k = 10
+    iter = 0
     if len(sys.argv) < 5 or len(sys.argv) > 6:
         print("An Error Has Occurred")
         sys.exit()
 
     if not sys.argv[1].isdigit():
-        print("Invalid number of clusters!")
-        sys.exit()
-    k = int(sys.argv[1])
-    if not isinstance(k, int) or k <= 1:
-        print("Invalid number of clusters!")
-        sys.exit()
+        cluster_flag = True
+    else:
+        k = int(sys.argv[1])
+    if  cluster_flag or not isinstance(k, int) or k <= 1:
+        cluster_flag = True
+        
 
     if len(sys.argv) == 6:
         if not sys.argv[2].isdigit():
+            iter_flag = True
+        else:
+            iter = int(sys.argv[2])
+        if iter_flag or not isinstance(iter, int) or iter <= 1 or iter >= 1000:
             print("Invalid maximum iteration!")
-            sys.exit()
-        iter = int(sys.argv[2])
-        if not isinstance(iter, int) or iter <= 1 or iter >= 1000:
-            print("Invalid maximum iteration!")
-            sys.exit()
+            iter_flag = True
+            
         eps = float(sys.argv[3])
         file1 = sys.argv[4]
         file2 = sys.argv[5]
@@ -78,4 +86,4 @@ if __name__ == '__main__':
         file1 = sys.argv[3]
         file2 = sys.argv[4]
 
-    main(k, iter, eps, file1, file2)
+    main(k, iter, eps, file1, file2, cluster_flag,iter_flag )
