@@ -81,7 +81,7 @@ if __name__ == '__main__':
         file1 = sys.argv[4]
         file2 = sys.argv[5]
     else:
-        iter = 300  # default value
+        iter = 300  
         eps = float(sys.argv[2])
         file1 = sys.argv[3]
         file2 = sys.argv[4]
